@@ -24,436 +24,436 @@ import ro.nicuch.elementals.Elementals;
 import ro.nicuch.elementals.User;
 
 public class FieldUtil {
-	private final static ConcurrentMap<String, Field> fields = new ConcurrentHashMap<String, Field>();
+    private final static ConcurrentMap<String, Field> fields = new ConcurrentHashMap<String, Field>();
 
-	public static void registerField(User user, Block block, String id, Block maxLoc, Block minLoc) {
-		Field field = new Field(id, user.getBase().getUniqueId(), maxLoc, minLoc, block.getChunk(), block.getWorld());
-		fields.putIfAbsent(id, field);
-	}
+    public static void registerField(User user, Block block, String id, Block maxLoc, Block minLoc) {
+        Field field = new Field(id, user.getBase().getUniqueId(), maxLoc, minLoc, block.getChunk(), block.getWorld());
+        fields.putIfAbsent(id, field);
+    }
 
-	public static void unregisterField(Block block) {
-		String id = getFieldIdByBlock(block);
-		if (isFieldLoaded(id)) {
-			Field field = getFieldById(id);
-			field.delete();
-			fields.remove(id);
-			field.remove();
-		}
-	}
+    public static void unregisterField(Block block) {
+        String id = getFieldIdByBlock(block);
+        if (isFieldLoaded(id)) {
+            Field field = getFieldById(id);
+            field.delete();
+            fields.remove(id);
+            field.remove();
+        }
+    }
 
-	public static boolean isFieldNerby(User user, Location loc) {
-		Location l1 = loc.clone().add(-25, 0, -25);
-		if (isFieldAtLocation(l1))
-			if (!getFieldByLocation(l1).isOwner(user.getBase().getUniqueId()))
-				return true;
-		Location l2 = loc.clone().add(25, 0, 25);
-		if (isFieldAtLocation(l2))
-			if (!getFieldByLocation(l2).isOwner(user.getBase().getUniqueId()))
-				return true;
-		Location l3 = loc.clone().add(-25, 0, 25);
-		if (isFieldAtLocation(l3))
-			if (!getFieldByLocation(l3).isOwner(user.getBase().getUniqueId()))
-				return true;
-		Location l4 = loc.clone().add(25, 0, -25);
-		if (isFieldAtLocation(l4))
-			if (!getFieldByLocation(l4).isOwner(user.getBase().getUniqueId()))
-				return true;
-		return false;
-	}
+    public static boolean isFieldNerby(User user, Location loc) {
+        Location l1 = loc.clone().add(-25, 0, -25);
+        if (isFieldAtLocation(l1))
+            if (!getFieldByLocation(l1).isOwner(user.getBase().getUniqueId()))
+                return true;
+        Location l2 = loc.clone().add(25, 0, 25);
+        if (isFieldAtLocation(l2))
+            if (!getFieldByLocation(l2).isOwner(user.getBase().getUniqueId()))
+                return true;
+        Location l3 = loc.clone().add(-25, 0, 25);
+        if (isFieldAtLocation(l3))
+            if (!getFieldByLocation(l3).isOwner(user.getBase().getUniqueId()))
+                return true;
+        Location l4 = loc.clone().add(25, 0, -25);
+        if (isFieldAtLocation(l4))
+            if (!getFieldByLocation(l4).isOwner(user.getBase().getUniqueId()))
+                return true;
+        return false;
+    }
 
-	public static List<UUID> convertStringsToUUIDs(List<String> strings) {
-		List<UUID> list = Lists.newArrayList();
-		strings.forEach((String arg) -> list.add(UUID.fromString(arg)));
-		return list;
-	}
+    public static List<UUID> convertStringsToUUIDs(List<String> strings) {
+        List<UUID> list = Lists.newArrayList();
+        strings.forEach((String arg) -> list.add(UUID.fromString(arg)));
+        return list;
+    }
 
-	public static List<String> convertUUIDsToStrings(List<UUID> uuids) {
-		List<String> list = Lists.newArrayList();
-		uuids.forEach((UUID uuid) -> list.add(uuid.toString()));
-		return list;
-	}
+    public static List<String> convertUUIDsToStrings(List<UUID> uuids) {
+        List<String> list = Lists.newArrayList();
+        uuids.forEach((UUID uuid) -> list.add(uuid.toString()));
+        return list;
+    }
 
-	public static void loadFieldsInChunk(Chunk chunk) {
-		Bukkit.getScheduler().runTaskAsynchronously(Elementals.get(), () -> {
-			try {
-				ResultSet rs = Elementals
-						.getBase().prepareStatement("SELECT * FROM protection WHERE chunkx='" + chunk.getX()
-								+ "' AND chunkz='" + chunk.getZ() + "' AND world='" + chunk.getWorld().getName() + "';")
-						.executeQuery();
-				while (rs.next()) {
-					// Get Strings and Ints to not catch SQLException in Async
-					String worldName = rs.getString("world");
-					int y = rs.getInt("y");
-					int maxx = rs.getInt("maxx");
-					int maxz = rs.getInt("maxz");
-					int minx = rs.getInt("minx");
-					int minz = rs.getInt("minz");
-					String id = rs.getString("id");
-					UUID uuid = UUID.fromString(rs.getString("owner"));
-					Bukkit.getScheduler().runTask(Elementals.get(), () -> {
-						// Never access BukkitAPI async
-						World world = Bukkit.getWorld(worldName);
-						Block maxLoc = world.getBlockAt(maxx, y, maxz);
-						Block minLoc = world.getBlockAt(minx, y, minz);
-						Field field = new Field(id, uuid, maxLoc, minLoc, chunk, world);
-						fields.putIfAbsent(id, field);
-					});
-				}
-			} catch (SQLException exception) {
-				exception.printStackTrace();
-			}
-		});
-	}
+    public static void loadFieldsInChunk(Chunk chunk) {
+        Bukkit.getScheduler().runTaskAsynchronously(Elementals.get(), () -> {
+            try {
+                ResultSet rs = Elementals
+                        .getBase().prepareStatement("SELECT * FROM protection WHERE chunkx='" + chunk.getX()
+                                + "' AND chunkz='" + chunk.getZ() + "' AND world='" + chunk.getWorld().getName() + "';")
+                        .executeQuery();
+                while (rs.next()) {
+                    // Get Strings and Ints to not catch SQLException in Async
+                    String worldName = rs.getString("world");
+                    int y = rs.getInt("y");
+                    int maxx = rs.getInt("maxx");
+                    int maxz = rs.getInt("maxz");
+                    int minx = rs.getInt("minx");
+                    int minz = rs.getInt("minz");
+                    String id = rs.getString("id");
+                    UUID uuid = UUID.fromString(rs.getString("owner"));
+                    Bukkit.getScheduler().runTask(Elementals.get(), () -> {
+                        // Never access BukkitAPI async
+                        World world = Bukkit.getWorld(worldName);
+                        Block maxLoc = world.getBlockAt(maxx, y, maxz);
+                        Block minLoc = world.getBlockAt(minx, y, minz);
+                        Field field = new Field(id, uuid, maxLoc, minLoc, chunk, world);
+                        fields.putIfAbsent(id, field);
+                    });
+                }
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
 
-	public static void takeProtection(User user) {
-		Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
-		if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
-			user.getBase().sendMessage("§cTrebuie sa te uiti la blocul de diamant (§arespectiv protectia§c)!");
-			return;
-		}
-		BlockBreakEvent event = new BlockBreakEvent(block, user.getBase());
-		Bukkit.getPluginManager().callEvent(event);
-		if (event.isCancelled())
-			return;
-		block.breakNaturally();
-	}
+    public static void takeProtection(User user) {
+        Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
+        if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
+            user.getBase().sendMessage("ï¿½cTrebuie sa te uiti la blocul de diamant (ï¿½arespectiv protectiaï¿½c)!");
+            return;
+        }
+        BlockBreakEvent event = new BlockBreakEvent(block, user.getBase());
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled())
+            return;
+        block.breakNaturally();
+    }
 
-	public static void unloadFieldsInChunk(Chunk chunk) {
-		Bukkit.getScheduler().runTaskAsynchronously(Elementals.get(), () -> {
-			try {
-				ResultSet rs = Elementals
-						.getBase().prepareStatement("SELECT id FROM protection WHERE chunkx='" + chunk.getX()
-								+ "' AND chunkz='" + chunk.getZ() + "' AND world='" + chunk.getWorld().getName() + "';")
-						.executeQuery();
-				while (rs.next()) {
-					String id = rs.getString("id");
-					Bukkit.getScheduler().runTask(Elementals.get(), () -> {
-						Field field = fields.get(id);
-						fields.remove(id);
-						field.save();
-						field.remove();
-					});
-				}
-			} catch (SQLException exception) {
-				exception.printStackTrace();
-			}
-		});
-	}
+    public static void unloadFieldsInChunk(Chunk chunk) {
+        Bukkit.getScheduler().runTaskAsynchronously(Elementals.get(), () -> {
+            try {
+                ResultSet rs = Elementals
+                        .getBase().prepareStatement("SELECT id FROM protection WHERE chunkx='" + chunk.getX()
+                                + "' AND chunkz='" + chunk.getZ() + "' AND world='" + chunk.getWorld().getName() + "';")
+                        .executeQuery();
+                while (rs.next()) {
+                    String id = rs.getString("id");
+                    Bukkit.getScheduler().runTask(Elementals.get(), () -> {
+                        Field field = fields.get(id);
+                        fields.remove(id);
+                        field.save();
+                        field.remove();
+                    });
+                }
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
 
-	public static boolean isFieldAtLocation(Location location) {
-		for (Field field : fields.values())
-			if (field.getMaximLocation().getX() >= location.getBlockX()
-					&& field.getMaximLocation().getZ() >= location.getBlockZ()
-					&& field.getMinimLocation().getX() <= location.getBlockX()
-					&& field.getMinimLocation().getZ() <= location.getBlockZ()
-					&& field.getWorld().getName().equals(location.getWorld().getName()))
-				return true;
-		return false;
-	}
+    public static boolean isFieldAtLocation(Location location) {
+        for (Field field : fields.values())
+            if (field.getMaximLocation().getX() >= location.getBlockX()
+                    && field.getMaximLocation().getZ() >= location.getBlockZ()
+                    && field.getMinimLocation().getX() <= location.getBlockX()
+                    && field.getMinimLocation().getZ() <= location.getBlockZ()
+                    && field.getWorld().getName().equals(location.getWorld().getName()))
+                return true;
+        return false;
+    }
 
-	public static Field getFieldByLocation(Location location) {
-		for (Field field : fields.values())
-			if (field.getMaximLocation().getX() >= location.getBlockX()
-					&& field.getMaximLocation().getZ() >= location.getBlockZ()
-					&& field.getMinimLocation().getX() <= location.getBlockX()
-					&& field.getMinimLocation().getZ() <= location.getBlockZ()
-					&& field.getWorld().getName().equals(location.getWorld().getName()))
-				return field;
-		throw new NullPointerException("Nici o protectie gasita la locatia data.");
-	}
+    public static Field getFieldByLocation(Location location) {
+        for (Field field : fields.values())
+            if (field.getMaximLocation().getX() >= location.getBlockX()
+                    && field.getMaximLocation().getZ() >= location.getBlockZ()
+                    && field.getMinimLocation().getX() <= location.getBlockX()
+                    && field.getMinimLocation().getZ() <= location.getBlockZ()
+                    && field.getWorld().getName().equals(location.getWorld().getName()))
+                return field;
+        throw new NullPointerException("Nici o protectie gasita la locatia data.");
+    }
 
-	public static Field getFieldById(String id) {
-		if (fields.containsKey(id))
-			return fields.get(id);
-		else
-			throw new NullPointerException("Nici o protectie gasita dupa id-ul dat.");
-	}
+    public static Field getFieldById(String id) {
+        if (fields.containsKey(id))
+            return fields.get(id);
+        else
+            throw new NullPointerException("Nici o protectie gasita dupa id-ul dat.");
+    }
 
-	public static boolean isFieldLoaded(String id) {
-		return fields.containsKey(id);
-	}
+    public static boolean isFieldLoaded(String id) {
+        return fields.containsKey(id);
+    }
 
-	public static Collection<Field> getLoadedFields() {
-		return fields.values();
-	}
+    public static Collection<Field> getLoadedFields() {
+        return fields.values();
+    }
 
-	public static boolean isFieldBlock(Block block) {
-		try {
-			ResultSet rs = Elementals.getBase()
-					.prepareStatement("SELECT id FROM protection WHERE x='" + block.getX() + "' AND y='" + block.getY()
-							+ "' AND z='" + block.getZ() + "' AND world='" + block.getWorld().getName() + "';")
-					.executeQuery();
-			return rs.next();
-		} catch (SQLException exception) {
-			exception.printStackTrace();
-		}
-		return false;
-	}
+    public static boolean isFieldBlock(Block block) {
+        try {
+            ResultSet rs = Elementals.getBase()
+                    .prepareStatement("SELECT id FROM protection WHERE x='" + block.getX() + "' AND y='" + block.getY()
+                            + "' AND z='" + block.getZ() + "' AND world='" + block.getWorld().getName() + "';")
+                    .executeQuery();
+            return rs.next();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+        return false;
+    }
 
-	public static String getFieldIdByBlock(Block block) {
-		String id = "x" + String.valueOf(block.getX()) + "y" + String.valueOf(block.getY()) + "z"
-				+ String.valueOf(block.getZ()) + "world" + block.getWorld().getName();
-		return id;
-	}
+    public static String getFieldIdByBlock(Block block) {
+        String id = "x" + String.valueOf(block.getX()) + "y" + String.valueOf(block.getY()) + "z"
+                + String.valueOf(block.getZ()) + "world" + block.getWorld().getName();
+        return id;
+    }
 
-	public static void updateUser(User user, Location loc) {
-		if (isFieldAtLocation(loc)) {
-			if (!user.isInField()) {
-				user.getBase().sendMessage("§bAi intrat in protectia lui "
-						+ Bukkit.getOfflinePlayer(getFieldByLocation(loc).getOwner()).getName() + "!");
-			} else if (user.isInField() && !getFieldByLocation(loc).isOwner(user.getLastFieldOwner())) {
-				user.getBase().sendMessage("§bAi iesit din protectia lui "
-						+ Bukkit.getOfflinePlayer(user.getLastFieldOwner()).getName() + "!");
-				user.getBase().sendMessage("§bAi intrat in protectia lui "
-						+ Bukkit.getOfflinePlayer(getFieldByLocation(loc).getOwner()).getName() + "!");
-			}
-			user.getBase().setCollidable(false);
-			user.toggleField(true);
-			user.setLastFieldOwner(getFieldByLocation(loc).getOwner());
-		} else if (!isFieldAtLocation(loc)) {
-			if (user.isInField())
-				user.getBase().sendMessage("§bAi iesit din protectia lui "
-						+ Bukkit.getOfflinePlayer(user.getLastFieldOwner()).getName() + "!");
-			user.toggleField(false);
-			user.getBase().setCollidable(true);
-		}
-	}
+    public static void updateUser(User user, Location loc) {
+        if (isFieldAtLocation(loc)) {
+            if (!user.isInField()) {
+                user.getBase().sendMessage("ï¿½bAi intrat in protectia lui "
+                        + Bukkit.getOfflinePlayer(getFieldByLocation(loc).getOwner()).getName() + "!");
+            } else if (user.isInField() && !getFieldByLocation(loc).isOwner(user.getLastFieldOwner())) {
+                user.getBase().sendMessage("ï¿½bAi iesit din protectia lui "
+                        + Bukkit.getOfflinePlayer(user.getLastFieldOwner()).getName() + "!");
+                user.getBase().sendMessage("ï¿½bAi intrat in protectia lui "
+                        + Bukkit.getOfflinePlayer(getFieldByLocation(loc).getOwner()).getName() + "!");
+            }
+            user.getBase().setCollidable(false);
+            user.toggleField(true);
+            user.setLastFieldOwner(getFieldByLocation(loc).getOwner());
+        } else if (!isFieldAtLocation(loc)) {
+            if (user.isInField())
+                user.getBase().sendMessage("ï¿½bAi iesit din protectia lui "
+                        + Bukkit.getOfflinePlayer(user.getLastFieldOwner()).getName() + "!");
+            user.toggleField(false);
+            user.getBase().setCollidable(true);
+        }
+    }
 
-	@SuppressWarnings("deprecation")
-	public static void allowInField(User user, String name, boolean all, boolean allow) {
-		try {
-			OfflinePlayer member = Bukkit.getOfflinePlayer(name);
-			if (!all) {
-				Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
-				if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
-					user.getBase().sendMessage("§cTrebuie sa te uiti la blocul de diamant (§arespectiv protectia§c)!");
-					return;
-				}
-				if (!isFieldBlock(block)) {
-					user.getBase().sendMessage("§cTrebuie sa te uiti la blocul de diamant (§arespectiv protectia§c)!");
-					return;
-				}
-				Field field = getFieldById(getFieldIdByBlock(block));
-				if (!(field.isOwner(user.getBase().getUniqueId()) || user.hasPermission("protection.override"))) {
-					user.getBase().sendMessage("§bNu esti detinatorul protectiei!");
-					return;
-				}
-				if (allow) {
-					field.addMember(member.getUniqueId());
-					user.getBase().sendMessage("§aJucatorul §b" + name + " §aa fost adaugat.");
-				} else {
-					field.removeMember(member.getUniqueId());
-					user.getBase().sendMessage("§aJucatorul §b" + name + " §aa fost sters.");
-				}
-			} else {
-				ResultSet rs = Elementals.getBase().prepareStatement(
-						"SELECT id FROM protection WHERE owner='" + user.getBase().getUniqueId().toString() + "';")
-						.executeQuery();
-				while (rs.next()) {
-					if (allow) {
-						if (isFieldLoaded(rs.getString("id")))
-							getFieldById(rs.getString("id")).addMember(member.getUniqueId());
-					} else {
-						if (isFieldLoaded(rs.getString("id")))
-							getFieldById(rs.getString("id")).removeMember(member.getUniqueId());
-					}
-				}
-				if (allow)
-					user.getBase().sendMessage("§aJucatorul §b" + name + " §aa fost adaugat in toate protectiile.");
-				else
-					user.getBase().sendMessage("§aJucatorul §c" + name + " §aa fost sters din toate protectiile.");
-			}
-		} catch (Exception exception) {
-			user.getBase().sendMessage("§cEroare. §aContacteaza un admin!");
-			exception.printStackTrace();
-			return;
-		}
-	}
+    @SuppressWarnings("deprecation")
+    public static void allowInField(User user, String name, boolean all, boolean allow) {
+        try {
+            OfflinePlayer member = Bukkit.getOfflinePlayer(name);
+            if (!all) {
+                Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
+                if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
+                    user.getBase().sendMessage("ï¿½cTrebuie sa te uiti la blocul de diamant (ï¿½arespectiv protectiaï¿½c)!");
+                    return;
+                }
+                if (!isFieldBlock(block)) {
+                    user.getBase().sendMessage("ï¿½cTrebuie sa te uiti la blocul de diamant (ï¿½arespectiv protectiaï¿½c)!");
+                    return;
+                }
+                Field field = getFieldById(getFieldIdByBlock(block));
+                if (!(field.isOwner(user.getBase().getUniqueId()) || user.hasPermission("protection.override"))) {
+                    user.getBase().sendMessage("ï¿½bNu esti detinatorul protectiei!");
+                    return;
+                }
+                if (allow) {
+                    field.addMember(member.getUniqueId());
+                    user.getBase().sendMessage("ï¿½aJucatorul ï¿½b" + name + " ï¿½aa fost adaugat.");
+                } else {
+                    field.removeMember(member.getUniqueId());
+                    user.getBase().sendMessage("ï¿½aJucatorul ï¿½b" + name + " ï¿½aa fost sters.");
+                }
+            } else {
+                ResultSet rs = Elementals.getBase().prepareStatement(
+                        "SELECT id FROM protection WHERE owner='" + user.getBase().getUniqueId().toString() + "';")
+                        .executeQuery();
+                while (rs.next()) {
+                    if (allow) {
+                        if (isFieldLoaded(rs.getString("id")))
+                            getFieldById(rs.getString("id")).addMember(member.getUniqueId());
+                    } else {
+                        if (isFieldLoaded(rs.getString("id")))
+                            getFieldById(rs.getString("id")).removeMember(member.getUniqueId());
+                    }
+                }
+                if (allow)
+                    user.getBase().sendMessage("ï¿½aJucatorul ï¿½b" + name + " ï¿½aa fost adaugat in toate protectiile.");
+                else
+                    user.getBase().sendMessage("ï¿½aJucatorul ï¿½c" + name + " ï¿½aa fost sters din toate protectiile.");
+            }
+        } catch (Exception exception) {
+            user.getBase().sendMessage("ï¿½cEroare. ï¿½aContacteaza un admin!");
+            exception.printStackTrace();
+            return;
+        }
+    }
 
-	@SuppressWarnings("deprecation")
-	public static void visualiseField(User user) {
-		if (!isFieldAtLocation(user.getBase().getLocation())) {
-			user.getBase().sendMessage("§cTrebuie sa fi in protectia ta ca sa poti vizualiza!");
-			return;
-		}
-		Field field = getFieldByLocation(user.getBase().getLocation());
-		if (!(field.isMember(user.getBase().getUniqueId()) || field.isOwner(user.getBase().getUniqueId())
-				|| user.hasPermission("protection.override"))) {
-			user.getBase().sendMessage("§cTrebuie sa fi membru al protectiei ca sa poti vizualiza!");
-			return;
-		}
-		int maxx = field.getMaximLocation().getX();
-		int maxz = field.getMaximLocation().getZ();
-		int minx = field.getMinimLocation().getX();
-		int minz = field.getMinimLocation().getZ();
-		int midx = maxx - ((maxx - minx) / 2);
-		int midz = maxz - ((maxz - minz) / 2);
-		for (int y = 0; y < 256; y++) {
-			Location a = new Location(field.getWorld(), maxx, y, maxz);
-			user.getBase().sendBlockChange(a, Material.GLASS, (byte) 0);
-			Location b = new Location(field.getWorld(), minx, y, minz);
-			user.getBase().sendBlockChange(b, Material.GLASS, (byte) 0);
-			Location c = new Location(field.getWorld(), minx, y, maxz);
-			user.getBase().sendBlockChange(c, Material.GLASS, (byte) 0);
-			Location d = new Location(field.getWorld(), maxx, y, minz);
-			user.getBase().sendBlockChange(d, Material.GLASS, (byte) 0);
-			Location e = new Location(field.getWorld(), maxx, y, midz);
-			user.getBase().sendBlockChange(e, Material.GLASS, (byte) 0);
-			Location f = new Location(field.getWorld(), minx, y, midz);
-			user.getBase().sendBlockChange(f, Material.GLASS, (byte) 0);
-			Location g = new Location(field.getWorld(), midx, y, maxz);
-			user.getBase().sendBlockChange(g, Material.GLASS, (byte) 0);
-			Location h = new Location(field.getWorld(), midx, y, minz);
-			user.getBase().sendBlockChange(h, Material.GLASS, (byte) 0);
-		}
-		for (int y = 0; y < 256; y += 16) {
-			for (int x = minx; x < maxx; x++) {
-				Location loc0 = new Location(field.getWorld(), x, y, maxz);
-				user.getBase().sendBlockChange(loc0, Material.GLASS, (byte) 0);
-				Location loc1 = new Location(field.getWorld(), x, y, minz);
-				user.getBase().sendBlockChange(loc1, Material.GLASS, (byte) 0);
-			}
-			for (int z = minz; z < maxz; z++) {
-				Location loc0 = new Location(field.getWorld(), maxx, y, z);
-				user.getBase().sendBlockChange(loc0, Material.GLASS, (byte) 0);
-				Location loc1 = new Location(field.getWorld(), minx, y, z);
-				user.getBase().sendBlockChange(loc1, Material.GLASS, (byte) 0);
-			}
-		}
-		Bukkit.getScheduler().runTaskLater(Elementals.get(), () -> {
-			for (int y = 0; y < 256; y++) {
-				Location a = new Location(field.getWorld(), maxx, y, maxz);
-				user.getBase().sendBlockChange(a, a.getBlock().getType(), a.getBlock().getData());
-				Location b = new Location(field.getWorld(), minx, y, minz);
-				user.getBase().sendBlockChange(b, b.getBlock().getType(), b.getBlock().getData());
-				Location c = new Location(field.getWorld(), minx, y, maxz);
-				user.getBase().sendBlockChange(c, c.getBlock().getType(), c.getBlock().getData());
-				Location d = new Location(field.getWorld(), maxx, y, minz);
-				user.getBase().sendBlockChange(d, d.getBlock().getType(), d.getBlock().getData());
-				Location e = new Location(field.getWorld(), maxx, y, midz);
-				user.getBase().sendBlockChange(e, e.getBlock().getType(), e.getBlock().getData());
-				Location f = new Location(field.getWorld(), minx, y, midz);
-				user.getBase().sendBlockChange(f, f.getBlock().getType(), f.getBlock().getData());
-				Location g = new Location(field.getWorld(), midx, y, maxz);
-				user.getBase().sendBlockChange(g, g.getBlock().getType(), g.getBlock().getData());
-				Location h = new Location(field.getWorld(), midx, y, minz);
-				user.getBase().sendBlockChange(h, h.getBlock().getType(), h.getBlock().getData());
-			}
-			for (int y = 0; y < 256; y += 16) {
-				for (int x = minx; x < maxx; x++) {
-					Location loc0 = new Location(field.getWorld(), x, y, maxz);
-					user.getBase().sendBlockChange(loc0, loc0.getBlock().getType(), loc0.getBlock().getData());
-					Location loc1 = new Location(field.getWorld(), x, y, minz);
-					user.getBase().sendBlockChange(loc1, loc1.getBlock().getType(), loc1.getBlock().getData());
-				}
-				for (int z = minz; z < maxz; z++) {
-					Location loc0 = new Location(field.getWorld(), maxx, y, z);
-					user.getBase().sendBlockChange(loc0, loc0.getBlock().getType(), loc0.getBlock().getData());
-					Location loc1 = new Location(field.getWorld(), minx, y, z);
-					user.getBase().sendBlockChange(loc1, loc1.getBlock().getType(), loc1.getBlock().getData());
-				}
-			}
-		}, 20 * 20);
-	}
+    @SuppressWarnings("deprecation")
+    public static void visualiseField(User user) {
+        if (!isFieldAtLocation(user.getBase().getLocation())) {
+            user.getBase().sendMessage("ï¿½cTrebuie sa fi in protectia ta ca sa poti vizualiza!");
+            return;
+        }
+        Field field = getFieldByLocation(user.getBase().getLocation());
+        if (!(field.isMember(user.getBase().getUniqueId()) || field.isOwner(user.getBase().getUniqueId())
+                || user.hasPermission("protection.override"))) {
+            user.getBase().sendMessage("ï¿½cTrebuie sa fi membru al protectiei ca sa poti vizualiza!");
+            return;
+        }
+        int maxx = field.getMaximLocation().getX();
+        int maxz = field.getMaximLocation().getZ();
+        int minx = field.getMinimLocation().getX();
+        int minz = field.getMinimLocation().getZ();
+        int midx = maxx - ((maxx - minx) / 2);
+        int midz = maxz - ((maxz - minz) / 2);
+        for (int y = 0; y < 256; y++) {
+            Location a = new Location(field.getWorld(), maxx, y, maxz);
+            user.getBase().sendBlockChange(a, Material.GLASS, (byte) 0);
+            Location b = new Location(field.getWorld(), minx, y, minz);
+            user.getBase().sendBlockChange(b, Material.GLASS, (byte) 0);
+            Location c = new Location(field.getWorld(), minx, y, maxz);
+            user.getBase().sendBlockChange(c, Material.GLASS, (byte) 0);
+            Location d = new Location(field.getWorld(), maxx, y, minz);
+            user.getBase().sendBlockChange(d, Material.GLASS, (byte) 0);
+            Location e = new Location(field.getWorld(), maxx, y, midz);
+            user.getBase().sendBlockChange(e, Material.GLASS, (byte) 0);
+            Location f = new Location(field.getWorld(), minx, y, midz);
+            user.getBase().sendBlockChange(f, Material.GLASS, (byte) 0);
+            Location g = new Location(field.getWorld(), midx, y, maxz);
+            user.getBase().sendBlockChange(g, Material.GLASS, (byte) 0);
+            Location h = new Location(field.getWorld(), midx, y, minz);
+            user.getBase().sendBlockChange(h, Material.GLASS, (byte) 0);
+        }
+        for (int y = 0; y < 256; y += 16) {
+            for (int x = minx; x < maxx; x++) {
+                Location loc0 = new Location(field.getWorld(), x, y, maxz);
+                user.getBase().sendBlockChange(loc0, Material.GLASS, (byte) 0);
+                Location loc1 = new Location(field.getWorld(), x, y, minz);
+                user.getBase().sendBlockChange(loc1, Material.GLASS, (byte) 0);
+            }
+            for (int z = minz; z < maxz; z++) {
+                Location loc0 = new Location(field.getWorld(), maxx, y, z);
+                user.getBase().sendBlockChange(loc0, Material.GLASS, (byte) 0);
+                Location loc1 = new Location(field.getWorld(), minx, y, z);
+                user.getBase().sendBlockChange(loc1, Material.GLASS, (byte) 0);
+            }
+        }
+        Bukkit.getScheduler().runTaskLater(Elementals.get(), () -> {
+            for (int y = 0; y < 256; y++) {
+                Location a = new Location(field.getWorld(), maxx, y, maxz);
+                user.getBase().sendBlockChange(a, a.getBlock().getType(), a.getBlock().getData());
+                Location b = new Location(field.getWorld(), minx, y, minz);
+                user.getBase().sendBlockChange(b, b.getBlock().getType(), b.getBlock().getData());
+                Location c = new Location(field.getWorld(), minx, y, maxz);
+                user.getBase().sendBlockChange(c, c.getBlock().getType(), c.getBlock().getData());
+                Location d = new Location(field.getWorld(), maxx, y, minz);
+                user.getBase().sendBlockChange(d, d.getBlock().getType(), d.getBlock().getData());
+                Location e = new Location(field.getWorld(), maxx, y, midz);
+                user.getBase().sendBlockChange(e, e.getBlock().getType(), e.getBlock().getData());
+                Location f = new Location(field.getWorld(), minx, y, midz);
+                user.getBase().sendBlockChange(f, f.getBlock().getType(), f.getBlock().getData());
+                Location g = new Location(field.getWorld(), midx, y, maxz);
+                user.getBase().sendBlockChange(g, g.getBlock().getType(), g.getBlock().getData());
+                Location h = new Location(field.getWorld(), midx, y, minz);
+                user.getBase().sendBlockChange(h, h.getBlock().getType(), h.getBlock().getData());
+            }
+            for (int y = 0; y < 256; y += 16) {
+                for (int x = minx; x < maxx; x++) {
+                    Location loc0 = new Location(field.getWorld(), x, y, maxz);
+                    user.getBase().sendBlockChange(loc0, loc0.getBlock().getType(), loc0.getBlock().getData());
+                    Location loc1 = new Location(field.getWorld(), x, y, minz);
+                    user.getBase().sendBlockChange(loc1, loc1.getBlock().getType(), loc1.getBlock().getData());
+                }
+                for (int z = minz; z < maxz; z++) {
+                    Location loc0 = new Location(field.getWorld(), maxx, y, z);
+                    user.getBase().sendBlockChange(loc0, loc0.getBlock().getType(), loc0.getBlock().getData());
+                    Location loc1 = new Location(field.getWorld(), minx, y, z);
+                    user.getBase().sendBlockChange(loc1, loc1.getBlock().getType(), loc1.getBlock().getData());
+                }
+            }
+        }, 20 * 20);
+    }
 
-	public static void infoField(User user) {
-		Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
-		if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
-			user.getBase().sendMessage("§cTrebuie sa te uiti la blocul de diamant (§arespectiv protectia§c)!");
-			return;
-		}
-		if (!isFieldBlock(block)) {
-			user.getBase().sendMessage("§cTrebuie sa te uiti la blocul de diamant (§arespectiv protectia§c)!");
-			return;
-		}
-		Field field = getFieldById(getFieldIdByBlock(block));
-		if (!(field.isOwner(user.getBase().getUniqueId()) || field.isMember(user.getBase().getUniqueId())
-				|| user.hasPermission("protection.override"))) {
-			user.getBase().sendMessage("§bNu poti vedea informatii despre protectie!");
-			return;
-		}
-		user.getBase().sendMessage("§b========================================");
-		user.getBase().sendMessage("§a§lInformatii despre protectie:");
-		user.getBase().sendMessage("");
-		user.getBase().sendMessage("§eLocatie: §6" + block.getWorld().getName() + " §c/ §6" + block.getX()
-				+ "(x) §c/ §6" + block.getY() + "(y) §c/ §6" + block.getZ() + "(z)");
-		user.getBase().sendMessage("§9Marime: §a51(x) §c/ §a256(y) §c/ §a51(x)");
-		user.getBase().sendMessage("§4Locatie maxima: §a" + field.getWorld().getName() + " §c/ §a"
-				+ field.getMaximLocation().getX() + "(x) §c/ §a" + field.getMaximLocation().getZ() + "(z)");
-		user.getBase().sendMessage("§cLocatie minima: §a" + field.getWorld().getName() + " §c/ §a"
-				+ field.getMinimLocation().getX() + "(x) §c/ §a" + field.getMinimLocation().getZ() + "(z)");
-		user.getBase().sendMessage("§bDetinator: §6" + Bukkit.getOfflinePlayer(field.getOwner()).getName() + " §f-> §d"
-				+ field.getOwner().toString());
-		if (!field.getMembers().isEmpty())
-			user.getBase().sendMessage("§bMembrii:");
-		field.getMembers().forEach((UUID uuid) -> user.getBase()
-				.sendMessage("§e" + Bukkit.getOfflinePlayer(uuid).getName() + " §f-> §d" + uuid));
-		user.getBase().sendMessage("");
-		user.getBase().sendMessage("§b========================================");
-	}
+    public static void infoField(User user) {
+        Block block = user.getBase().getTargetBlock((Set<Material>) null, 3);
+        if (!block.getType().equals(Material.DIAMOND_BLOCK)) {
+            user.getBase().sendMessage("ï¿½cTrebuie sa te uiti la blocul de diamant (ï¿½arespectiv protectiaï¿½c)!");
+            return;
+        }
+        if (!isFieldBlock(block)) {
+            user.getBase().sendMessage("ï¿½cTrebuie sa te uiti la blocul de diamant (ï¿½arespectiv protectiaï¿½c)!");
+            return;
+        }
+        Field field = getFieldById(getFieldIdByBlock(block));
+        if (!(field.isOwner(user.getBase().getUniqueId()) || field.isMember(user.getBase().getUniqueId())
+                || user.hasPermission("protection.override"))) {
+            user.getBase().sendMessage("ï¿½bNu poti vedea informatii despre protectie!");
+            return;
+        }
+        user.getBase().sendMessage("ï¿½b========================================");
+        user.getBase().sendMessage("ï¿½aï¿½lInformatii despre protectie:");
+        user.getBase().sendMessage("");
+        user.getBase().sendMessage("ï¿½eLocatie: ï¿½6" + block.getWorld().getName() + " ï¿½c/ ï¿½6" + block.getX()
+                + "(x) ï¿½c/ ï¿½6" + block.getY() + "(y) ï¿½c/ ï¿½6" + block.getZ() + "(z)");
+        user.getBase().sendMessage("ï¿½9Marime: ï¿½a51(x) ï¿½c/ ï¿½a256(y) ï¿½c/ ï¿½a51(x)");
+        user.getBase().sendMessage("ï¿½4Locatie maxima: ï¿½a" + field.getWorld().getName() + " ï¿½c/ ï¿½a"
+                + field.getMaximLocation().getX() + "(x) ï¿½c/ ï¿½a" + field.getMaximLocation().getZ() + "(z)");
+        user.getBase().sendMessage("ï¿½cLocatie minima: ï¿½a" + field.getWorld().getName() + " ï¿½c/ ï¿½a"
+                + field.getMinimLocation().getX() + "(x) ï¿½c/ ï¿½a" + field.getMinimLocation().getZ() + "(z)");
+        user.getBase().sendMessage("ï¿½bDetinator: ï¿½6" + Bukkit.getOfflinePlayer(field.getOwner()).getName() + " ï¿½f-> ï¿½d"
+                + field.getOwner().toString());
+        if (!field.getMembers().isEmpty())
+            user.getBase().sendMessage("ï¿½bMembrii:");
+        field.getMembers().forEach((UUID uuid) -> user.getBase()
+                .sendMessage("ï¿½e" + Bukkit.getOfflinePlayer(uuid).getName() + " ï¿½f-> ï¿½d" + uuid));
+        user.getBase().sendMessage("");
+        user.getBase().sendMessage("ï¿½b========================================");
+    }
 
-	@SuppressWarnings("deprecation")
-	public static void locFields(User user) {
-		try {
-			if (isFieldAtLocation(user.getBase().getLocation())) {
-				Field field = getFieldByLocation(user.getBase().getLocation());
-				if (field.isOwner(user.getBase().getUniqueId()) || user.hasPermission("protection.override")) {
-					for (int x = field.getMinimLocation().getX(); x < field.getMaximLocation().getX(); x++) {
-						Location loc = new Location(field.getWorld(), x, field.getMaximLocation().getY(),
-								field.getMaximLocation().getZ() - 25);
-						user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
-					}
-					for (int z = field.getMinimLocation().getZ(); z < field.getMaximLocation().getZ(); z++) {
-						Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25,
-								field.getMaximLocation().getY(), z);
-						user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
-					}
-					for (int y = 0; y < 256; y++) {
-						Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25, y,
-								field.getMaximLocation().getZ() - 25);
-						user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
-					}
-					Bukkit.getScheduler().runTaskLater(Elementals.get(), () -> {
-						for (int x = field.getMinimLocation().getX(); x < field.getMaximLocation().getX(); x++) {
-							Location loc = new Location(field.getWorld(), x, field.getMaximLocation().getY(),
-									field.getMaximLocation().getZ() - 25);
-							user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
-						}
-						for (int z = field.getMinimLocation().getZ(); z < field.getMaximLocation().getZ(); z++) {
-							Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25,
-									field.getMaximLocation().getY(), z);
-							user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
-						}
-						for (int y = 0; y < 256; y++) {
-							Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25, y,
-									field.getMaximLocation().getZ() - 25);
-							user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
-						}
-					}, 20 * 20);
-				} else {
-					ResultSet rs = Elementals.getBase()
-							.prepareStatement("SELECT x, y, z, world FROM protection WHERE owner='"
-									+ user.getBase().getUniqueId().toString() + "';")
-							.executeQuery();
-					user.getBase().sendMessage("§bProtectiile tale:");
-					while (rs.next())
-						user.getBase().sendMessage("§5§l> §b" + rs.getString("world") + "§c, §b" + rs.getString("x")
-								+ "§c, §b" + rs.getString("y") + "§c, §b" + rs.getString("z"));
-				}
-			} else {
-				ResultSet rs = Elementals.getBase()
-						.prepareStatement("SELECT x, y, z, world FROM protection WHERE owner='"
-								+ user.getBase().getUniqueId().toString() + "';")
-						.executeQuery();
-				user.getBase().sendMessage("§bProtectiile tale:");
-				while (rs.next())
-					user.getBase().sendMessage("§5§l> §b" + rs.getString("world") + "§c, §b" + rs.getString("x")
-							+ "§c, §b" + rs.getString("y") + "§c, §b" + rs.getString("z"));
-			}
-		} catch (Exception exception) {
-			user.getBase().sendMessage("§cEroare. §aContacteaza un admin!");
-			exception.printStackTrace();
-			return;
-		}
-	}
+    @SuppressWarnings("deprecation")
+    public static void locFields(User user) {
+        try {
+            if (isFieldAtLocation(user.getBase().getLocation())) {
+                Field field = getFieldByLocation(user.getBase().getLocation());
+                if (field.isOwner(user.getBase().getUniqueId()) || user.hasPermission("protection.override")) {
+                    for (int x = field.getMinimLocation().getX(); x < field.getMaximLocation().getX(); x++) {
+                        Location loc = new Location(field.getWorld(), x, field.getMaximLocation().getY(),
+                                field.getMaximLocation().getZ() - 25);
+                        user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
+                    }
+                    for (int z = field.getMinimLocation().getZ(); z < field.getMaximLocation().getZ(); z++) {
+                        Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25,
+                                field.getMaximLocation().getY(), z);
+                        user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
+                    }
+                    for (int y = 0; y < 256; y++) {
+                        Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25, y,
+                                field.getMaximLocation().getZ() - 25);
+                        user.getBase().sendBlockChange(loc, Material.GLASS, (byte) 0);
+                    }
+                    Bukkit.getScheduler().runTaskLater(Elementals.get(), () -> {
+                        for (int x = field.getMinimLocation().getX(); x < field.getMaximLocation().getX(); x++) {
+                            Location loc = new Location(field.getWorld(), x, field.getMaximLocation().getY(),
+                                    field.getMaximLocation().getZ() - 25);
+                            user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
+                        }
+                        for (int z = field.getMinimLocation().getZ(); z < field.getMaximLocation().getZ(); z++) {
+                            Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25,
+                                    field.getMaximLocation().getY(), z);
+                            user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
+                        }
+                        for (int y = 0; y < 256; y++) {
+                            Location loc = new Location(field.getWorld(), field.getMaximLocation().getX() - 25, y,
+                                    field.getMaximLocation().getZ() - 25);
+                            user.getBase().sendBlockChange(loc, loc.getBlock().getType(), loc.getBlock().getData());
+                        }
+                    }, 20 * 20);
+                } else {
+                    ResultSet rs = Elementals.getBase()
+                            .prepareStatement("SELECT x, y, z, world FROM protection WHERE owner='"
+                                    + user.getBase().getUniqueId().toString() + "';")
+                            .executeQuery();
+                    user.getBase().sendMessage("ï¿½bProtectiile tale:");
+                    while (rs.next())
+                        user.getBase().sendMessage("ï¿½5ï¿½l> ï¿½b" + rs.getString("world") + "ï¿½c, ï¿½b" + rs.getString("x")
+                                + "ï¿½c, ï¿½b" + rs.getString("y") + "ï¿½c, ï¿½b" + rs.getString("z"));
+                }
+            } else {
+                ResultSet rs = Elementals.getBase()
+                        .prepareStatement("SELECT x, y, z, world FROM protection WHERE owner='"
+                                + user.getBase().getUniqueId().toString() + "';")
+                        .executeQuery();
+                user.getBase().sendMessage("ï¿½bProtectiile tale:");
+                while (rs.next())
+                    user.getBase().sendMessage("ï¿½5ï¿½l> ï¿½b" + rs.getString("world") + "ï¿½c, ï¿½b" + rs.getString("x")
+                            + "ï¿½c, ï¿½b" + rs.getString("y") + "ï¿½c, ï¿½b" + rs.getString("z"));
+            }
+        } catch (Exception exception) {
+            user.getBase().sendMessage("ï¿½cEroare. ï¿½aContacteaza un admin!");
+            exception.printStackTrace();
+            return;
+        }
+    }
 }

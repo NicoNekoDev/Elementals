@@ -8,50 +8,50 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
 public class NanoBowShotEvent extends Event implements Cancellable {
-	private final static HandlerList handlers = new HandlerList();
-	private final LivingEntity entity;
-	private final ItemStack bow;
-	private Projectile proj;
-	private boolean cancel;
+    private final static HandlerList handlers = new HandlerList();
+    private final LivingEntity entity;
+    private final ItemStack bow;
+    private Projectile proj;
+    private boolean cancel;
 
-	public NanoBowShotEvent(LivingEntity entity, ItemStack bow, Projectile proj) {
-		this.entity = entity;
-		this.bow = bow;
-		this.proj = proj;
-	}
+    public NanoBowShotEvent(LivingEntity entity, ItemStack bow, Projectile proj) {
+        this.entity = entity;
+        this.bow = bow;
+        this.proj = proj;
+    }
 
-	public void setProjectile(Projectile proj) {
-		this.proj = proj;
-	}
+    public void setProjectile(Projectile proj) {
+        this.proj = proj;
+    }
 
-	public LivingEntity getEntity() {
-		return this.entity;
-	}
+    public LivingEntity getEntity() {
+        return this.entity;
+    }
 
-	public ItemStack getBow() {
-		return this.bow;
-	}
+    public ItemStack getBow() {
+        return this.bow;
+    }
 
-	public Projectile getProjectile() {
-		return this.proj;
-	}
+    public Projectile getProjectile() {
+        return this.proj;
+    }
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return this.cancel;
-	}
+    @Override
+    public boolean isCancelled() {
+        return this.cancel;
+    }
 
-	@Override
-	public void setCancelled(boolean b) {
-		this.cancel = b;
-	}
+    @Override
+    public void setCancelled(boolean b) {
+        this.cancel = b;
+    }
 }

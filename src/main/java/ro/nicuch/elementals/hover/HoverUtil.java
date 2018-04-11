@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class HoverUtil {
 
-	public static String rawMessage(String first, String second, ItemStack item) {
-		return first + CraftItemStack.asNMSCopy(item).getTag().toString() + second;
-	}
+    public static String rawMessage(String first, String second, ItemStack item) {
+        return first + CraftItemStack.asNMSCopy(item).getTag().toString() + second;
+    }
 }

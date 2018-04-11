@@ -15,67 +15,67 @@ import ro.nicuch.elementals.Elementals;
 import ro.nicuch.elementals.User;
 
 public class NanoBlockBreakEvent extends Event implements Cancellable {
-	private final static HandlerList handlers = new HandlerList();
-	private final Player player;
-	private final Block block;
-	private final List<ItemStack> items = Lists.newArrayList();
-	private boolean cancel;
+    private final static HandlerList handlers = new HandlerList();
+    private final Player player;
+    private final Block block;
+    private final List<ItemStack> items = Lists.newArrayList();
+    private boolean cancel;
 
-	public NanoBlockBreakEvent(Player player, Block block, List<ItemStack> list) {
-		this.player = player;
-		this.block = block;
-		items.addAll(list);
-	}
+    public NanoBlockBreakEvent(Player player, Block block, List<ItemStack> list) {
+        this.player = player;
+        this.block = block;
+        items.addAll(list);
+    }
 
-	public NanoBlockBreakEvent(Player player, Block block) {
-		this.player = player;
-		this.block = block;
-	}
+    public NanoBlockBreakEvent(Player player, Block block) {
+        this.player = player;
+        this.block = block;
+    }
 
-	public Player getPlayer() {
-		return this.player;
-	}
+    public Player getPlayer() {
+        return this.player;
+    }
 
-	public Block getBlock() {
-		return this.block;
-	}
+    public Block getBlock() {
+        return this.block;
+    }
 
-	public List<ItemStack> getDrops() {
-		return this.items;
-	}
+    public List<ItemStack> getDrops() {
+        return this.items;
+    }
 
-	public void addDrop(ItemStack item) {
-		this.items.add(item);
-	}
+    public void addDrop(ItemStack item) {
+        this.items.add(item);
+    }
 
-	public void addDrops(List<ItemStack> items) {
-		this.items.addAll(items);
-	}
+    public void addDrops(List<ItemStack> items) {
+        this.items.addAll(items);
+    }
 
-	public void clearDrops() {
-		this.items.clear();
-	}
+    public void clearDrops() {
+        this.items.clear();
+    }
 
-	public User getUser() {
-		return Elementals.getUser(this.player);
-	}
+    public User getUser() {
+        return Elementals.getUser(this.player);
+    }
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return this.cancel;
-	}
+    @Override
+    public boolean isCancelled() {
+        return this.cancel;
+    }
 
-	@Override
-	public void setCancelled(boolean b) {
-		this.cancel = b;
-	}
+    @Override
+    public void setCancelled(boolean b) {
+        this.cancel = b;
+    }
 }
